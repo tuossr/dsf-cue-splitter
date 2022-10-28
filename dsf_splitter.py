@@ -1,11 +1,6 @@
 import os
 import sys 
 
-# [  
-#     ["FILE_NAME", ["TRACK_NAME", "TIME_START"], ["TRACK_NAME", "TIME_START"],
-#
-#     ["FILE_NAME", ["TRACK_NAME", "TIME_START"], ["TRACK_NAME", "TIME_START"]
-# ] 
 
 path = '\\'.join(sys.argv[1].split(sep='\\')[:-1]) + '\\'
 new_dir_path = os.path.join(path, 'Splitted Tracks\\')
@@ -47,19 +42,30 @@ with open(sys.argv[1], 'r') as file:
     if len(temp_cue) > 1:
         parsed_cue.append(temp_cue)
 
-
+try_make_dir = True
+dir_name_postfix = 1
+while try_make_dir:
+    try:
+        os.mkdir(new_dir_path)
+    except:
+        if dir_name_postfix > 1:
+            new_dir_path = new_dir_path[:-3] + '(' + str(dir_name_postfix) + ')'
+        else:
+            new_dir_path += '(' + str(dir_name_postfix) + ')'
+        dir_name_postfix += 1
+    else:
+        try_make_dir = False
+        
 #track_file[0] = "FILE_NAME"
 #track_file[n] = ["TRACK_NAME", "TIME_START"]
-
-os.mkdir(new_dir_path)
 
 for track_file in parsed_cue:
     with open(path + track_file[0], 'rb') as file:
         header_1 = file.read(12)
         total_file_size_b = file.read(8)
         total_file_size = int.from_bytes(total_file_size_b, 'little')
-        ID3v2 = file.read(8)
-        ID3v2 = b'\x00\x00\x00\x00\x00\x00\x00\x00'
+        id3v2 = file.read(8)
+        id3v2 = b'\x00\x00\x00\x00\x00\x00\x00\x00'
         header_2 = file.read(24)
         channel_num_b = file.read(4)
         channel_num = int.from_bytes(channel_num_b, 'little')
@@ -87,7 +93,7 @@ for track_file in parsed_cue:
             bytes_remaining_to_read_write -= bytes_to_write
             new_file = open(new_dir_path + line[0] + '.dsf', 'wb')
             new_file.write(header_1 + (header_total_size + bytes_to_write).to_bytes(8, 'little')
-                               + ID3v2 + header_2 + channel_num_b + sampling_frequency_b + header_3
+                               + id3v2 + header_2 + channel_num_b + sampling_frequency_b + header_3
                                + (bytes_to_write * 8 // channel_num).to_bytes(8, 'little')
                                + header_4 + (bytes_to_write + 12).to_bytes(8, 'little'))
             while bytes_to_write:
