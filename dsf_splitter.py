@@ -8,7 +8,7 @@ new_dir_path = os.path.join(path, 'Splitted Tracks\\')
 parsed_cue = []
 
 with open(sys.argv[1], 'r') as file:
-    state = (0,0,0,0)
+    state = (0,0,0)
     temp_cue, temp_index = [], []
     for line in file:
         line_1 = line
@@ -18,30 +18,30 @@ with open(sys.argv[1], 'r') as file:
         if line[0] == 'FILE' or line[0] == 'TITLE':
             line = [w.strip() for w in line_1.split(sep='"')]
         if line[0] == 'FILE':
-            assert(state == (0,0,0,0) or state == (1,1,1,1))
-            if state == (1,1,1,1):
+            assert line[1][-3:] == 'dsf', 'Can parse only dsf format'
+            assert state == (0,0,0) or state == (1,1,1), "Couldn't parse CUE file"
+            if state == (1,1,1):
                 parsed_cue.append(temp_cue)
                 temp_cue = []
-            state = (1,0,0,0)
+            state = (1,0,0)
             temp_cue.append(line[1])
-        elif line[0] == 'TRACK':
-            assert(state == (1,0,0,0) or state == (1,1,1,1))
-            state = (1,1,0,0)
         elif line[0] == 'TITLE':
-            if state == (0,0,0,0):
+            if state == (0,0,0):
                 continue
-            assert(state == (1,1,0,0))
-            state = (1,1,1,0)
+            assert state == (1,0,0), "Couldn't parse CUE file"
+            state = (1,1,0)
             temp_index.append(line[1])
         elif line[0] == 'INDEX':
-            assert(state == (1,1,1,0))
-            state = (1,1,1,1)
+            assert state == (1,1,0), "Couldn't parse CUE file"
+            state = (1,1,1)
             temp_index.append(line[2])
             temp_cue.append(temp_index)
             temp_index = []
-    if len(temp_cue) > 1:
-        parsed_cue.append(temp_cue)
+    assert len(temp_cue) > 1, "Couldn't parse CUE file"
+    parsed_cue.append(temp_cue)
 
+assert len(parsed_cue), "Couldn't parse CUE file"    
+    
 try_make_dir = True
 dir_name_postfix = 1
 while try_make_dir:
