@@ -28,7 +28,7 @@ with open(sys.argv[1], 'r') as file:
         elif line[0] == 'TITLE':
             if state == (0,0,0):
                 continue
-            assert state == (1,0,0), "Couldn't parse CUE file"
+            assert state == (1,0,0) or state == (1,1,1), "Couldn't parse CUE file"
             state = (1,1,0)
             temp_index.append(line[1])
         elif line[0] == 'INDEX':
