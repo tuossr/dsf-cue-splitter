@@ -18,6 +18,8 @@ with open(sys.argv[1], 'r') as file:
     for line in file:
         line_1 = line
         line = [w for w in line.split()]
+        if not len(line):
+            continue
         if line[0] == 'FILE' or line[0] == 'TITLE':
             line = [w.strip() for w in line_1.split(sep='"')]
         if line[0] == 'FILE':
@@ -42,7 +44,8 @@ with open(sys.argv[1], 'r') as file:
             temp_index.append(line[2])
             temp_cue.append(temp_index)
             temp_index = []
-    parsed_cue.append(temp_cue)
+    if len(temp_cue) > 1:
+        parsed_cue.append(temp_cue)
 
 
 #track_file[0] = "FILE_NAME"
